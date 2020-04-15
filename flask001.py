@@ -1,11 +1,12 @@
-from flask import Flask, url_for, render_template, request, redirect, g
+from flask import Flask, url_for, render_template, request, redirect, g, flash, get_flashed_messages, make_response
 
 from model import User
-
+from flask import session
 import sqlite3
 
 app = Flask(__name__)
 app.config["DATABASE"] = "database.db"
+app.config["SECRET_KEY"] = "who i am? do you know?"
 
 
 def connect_db():
@@ -112,22 +113,113 @@ def delete_user_by_name(user_name):
     g.db.commit()
 
 
+# 更新数据库
+def update_user_by_name(old_name, user):
+    update_str = ""
+    users_attrs = user.getAttres()
+    last_attr = users_attrs[-1]
+    for attr in users_attrs:
+        if attr != last_attr:
+            update_str += attr + "=?,"
+        else:
+            update_str += attr + "=?"
+    sql_update = "UPDATE users SET " + update_str + "WHERE name=?"
+    args = user.tolist()
+    args.append(old_name)
+    print(sql_update)  # UPDATE users SET name=?,pwd=?,email=?,age=?,birthday=?,face=?WHERE name=?
+    print(args)  # ['张小宝', '321', '321@qq', '18', '2020-04-13', '1.jpg', '张大宝']
+    g.db.execute(sql_update, args)
+    g.db.commit()
+
+
 @app.route('/')
 def index():
-    delete_user_by_name("123")
-    return render_template("index.html")
-
-
-@app.route('/login/', methods=['GET', 'POST'])
-def user_login():
+    print("首页")
+    # 查询所有数据
     users = query_users_from_db()
     for user in users:
         print(user.tolist())
     print("==========================")
-    user_one = query_user_by_name("123")
+    print(session)
+
+    resp = make_response(render_template("index.html"))
+    resp.set_cookie('qqqq', 'xxxxxxx')
+
+    # 删除一条数据
+    # delete_user_by_name("123")
+
+    return resp
+
+#在该界面一旦请求的url找不到， 触发404错误后，app会找到定义的改路由，返回定义的内容 render_template('page_not_found.html'), 404
+@app.errorhandler(404)
+def page_not_found(error):
+    #return render_template('page_not_found.html'), 404
+    resp = make_response(render_template('page_not_found.html'), 404)
+    resp.headers['X-Something'] = 'hahahhaha'
+    return resp
+
+
+
+# @app.route('/')
+# def index():
+#     print("首页")
+#    return render_template("index.html")
+
+@app.route('/login/', methods=['GET', 'POST'])
+def user_login():
+    # 更新一条数据  修改张大宝信息 张大宝
+    user_one = query_user_by_name("张小宝")
     if user_one:
-        print(user_one.tolist())
+        user_one.name = "张大宝"
+        user_one.pwd = "321"
+        user_one.age = "18"
+        user_one.email = "321@qq"
+        user_one.birthday = "2020-04-13"
+        update_user_by_name("张小宝", user_one)
+
+    if request.method == "POST":
+        username = request.form["user_name"]
+        userpwd = request.form["user_pwd"]
+        # 查看用户是否存在
+        user_one = query_user_by_name(username)
+        if not user_one:
+            # 返回注册界面，重新登录
+            flash("用户名不存在！", category="err")  # Flashes a message to the next request 闪现一条消息到下一次消息请求
+            return render_template("user_login.html")
+        else:
+            # print(type(userpwd))
+            # print(type(user_one.pwd))
+            if str(userpwd) != str(user_one.pwd):
+                # 返回注册界面，重新登录
+                flash("密码输入错误！", category="err")  # Flashes a message to the next request 闪现一条消息到下一次消息请求
+                return render_template("user_login.html")
+            else:
+                # flash("登录成功！", category="ok")  # Flashes a message to the next request 闪现一条消息到下一次消息请求
+                session["user_name"] = user_one.name
+                # return render_template("index.html") #只返回index.html界面
+                return redirect(url_for('index'))  # 重定向界面并执行index路由视图函数
+
     return render_template("user_login.html")
+
+    # 查询所有数据
+    users = query_users_from_db()
+    for user in users:
+        print(user.tolist())
+    print("==========================")
+
+    # 查询一条数据
+    # user_one = query_user_by_name("123")
+    # if user_one:
+    #     print(user_one.tolist())
+
+    return render_template("user_login.html")
+
+
+@app.route('/logout')
+def logout():
+    # remove the username from the session if it's there
+    session.pop('user_name', None)
+    return redirect(url_for('index'))
 
 
 @app.route('/regist/', methods=['GET', 'POST'])
@@ -142,8 +234,18 @@ def user_regist():
         user.email = request.form["user_email"]
         user.face = request.form["user_face"]
 
-        instert_user_to_db(user)
+        # 查看用户是否存在
+        user_one = query_user_by_name(user.name)
+        if user_one:
+            # 返回注册界面，重新注册
+            flash("用户名已存在！", category="err")  # Flashes a message to the next request 闪现一条消息到下一次消息请求
 
+            return render_template("user_regist.html")
+
+        # 如果不存在执行插入操作
+        # 插入一条数据
+        instert_user_to_db(user)
+        flash("注册成功！", category="ok")
         # username作为查询参数带到url中去
         ## 重定向页面 生成url 执行 user_login 函数 跳转到登录界面
         return redirect(url_for("user_login", username=user.name))
