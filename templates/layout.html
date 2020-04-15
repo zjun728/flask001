@@ -34,21 +34,30 @@
                     <li><a href="#">关于</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
+                    {% if "user_name" in session %}
+                        <li><a href="{{ url_for("user_center") }}">个人中心</a></li>
+                        <li><a href="{{ url_for("logout") }}">退出</a></li>
+                    {% else %}
+                        <li class="active"><a href="{{ url_for("user_login") }}">登录 </a></li>
+                        <li><a href="{{ url_for("user_regist") }}">注册</a></li>
+                    {% endif %}
+                    <!--
                     <li class="active"><a href="{{ url_for("user_login") }}">登录 <span class="sr-only">(current)</span></a></li>
                     <li><a href="{{ url_for("user_regist") }}">注册</a></li>
                     <li><a href="{{ url_for("logout") }}">退出</a></li>
+                    -->
                 </ul>
             </div><!--/.nav-collapse -->
         </div><!--/.container-fluid -->
     </nav>
 
-{% block content %}
-    <h1>
-模板继承，user_login.html、 user_regist.html、 index.html 等界面继承此模板，并且重写此处内容
+    {% block content %}
+        <h1>
+            模板继承，user_login.html、 user_regist.html、 index.html 等界面继承此模板，并且重写此处内容
 
 
-    </h1>
-{% endblock %}
+        </h1>
+    {% endblock %}
 
 </div> <!-- /container -->
 

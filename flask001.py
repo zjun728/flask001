@@ -140,24 +140,25 @@ def index():
     for user in users:
         print(user.tolist())
     print("==========================")
-    print(session)
+    # print(session)
 
     resp = make_response(render_template("index.html"))
-    resp.set_cookie('qqqq', 'xxxxxxx')
+    #  resp.set_cookie('qqqq', 'xxxxxxx')
 
     # 删除一条数据
     # delete_user_by_name("123")
 
     return resp
 
-#在该界面一旦请求的url找不到， 触发404错误后，app会找到定义的改路由，返回定义的内容 render_template('page_not_found.html'), 404
+
+# 在该界面一旦请求的url找不到， 触发404错误后，app会找到定义的改路由，返回定义的内容 render_template('page_not_found.html'), 404
 @app.errorhandler(404)
 def page_not_found(error):
-    #return render_template('page_not_found.html'), 404
+    # return render_template('page_not_found.html'), 404
     resp = make_response(render_template('page_not_found.html'), 404)
-    resp.headers['X-Something'] = 'hahahhaha'
+    # resp.headers['X-Something'] = 'hahahhaha'
+    # resp.set_cookie("aaa","xxxxx")
     return resp
-
 
 
 # @app.route('/')
@@ -168,14 +169,14 @@ def page_not_found(error):
 @app.route('/login/', methods=['GET', 'POST'])
 def user_login():
     # 更新一条数据  修改张大宝信息 张大宝
-    user_one = query_user_by_name("张小宝")
-    if user_one:
-        user_one.name = "张大宝"
-        user_one.pwd = "321"
-        user_one.age = "18"
-        user_one.email = "321@qq"
-        user_one.birthday = "2020-04-13"
-        update_user_by_name("张小宝", user_one)
+    # user_one = query_user_by_name("张小宝")
+    # if user_one:
+    #     user_one.name = "张大宝"
+    #     user_one.pwd = "321"
+    #     user_one.age = "18"
+    #     user_one.email = "321@qq"
+    #     user_one.birthday = "2020-04-13"
+    #     update_user_by_name("张小宝", user_one)
 
     if request.method == "POST":
         username = request.form["user_name"]
@@ -202,10 +203,10 @@ def user_login():
     return render_template("user_login.html")
 
     # 查询所有数据
-    users = query_users_from_db()
-    for user in users:
-        print(user.tolist())
-    print("==========================")
+    # users = query_users_from_db()
+    # for user in users:
+    #     print(user.tolist())
+    # print("==========================")
 
     # 查询一条数据
     # user_one = query_user_by_name("123")
@@ -250,6 +251,11 @@ def user_regist():
         ## 重定向页面 生成url 执行 user_login 函数 跳转到登录界面
         return redirect(url_for("user_login", username=user.name))
     return render_template("user_regist.html")
+
+
+@app.route('/center/', methods=['GET', 'POST'])
+def user_center():
+    return render_template("user_center.html")
 
 
 if __name__ == '__main__':
