@@ -106,6 +106,12 @@ def query_user_by_name(user_name):
     user.fromList(first_item[1:])  # 第一位为id 从第二位才开始赋值
     return user
 
+#清空数据库
+def query_user_all():
+    dellete_sql = "DELETE FROM users"  # DELETE FROM users 删除全部数据
+    args = []
+    g.db.execute(dellete_sql)
+    g.db.commit()
 
 # 按照条件（name）删除一条数据
 def delete_user_by_name(user_name):
@@ -177,6 +183,9 @@ def user_login_req(f):
 
 @app.route('/')
 def index():
+
+
+
     users = query_users_from_db()
     for user in users:
         print(user.tolist())
