@@ -106,12 +106,14 @@ def query_user_by_name(user_name):
     user.fromList(first_item[1:])  # 第一位为id 从第二位才开始赋值
     return user
 
-#清空数据库
+
+# 清空数据库
 def query_user_all():
     dellete_sql = "DELETE FROM users"  # DELETE FROM users 删除全部数据
     args = []
     g.db.execute(dellete_sql)
     g.db.commit()
+
 
 # 按照条件（name）删除一条数据
 def delete_user_by_name(user_name):
@@ -182,10 +184,7 @@ def user_login_req(f):
 
 
 @app.route('/')
-def index():
-
-
-
+def index():  # 首页
     users = query_users_from_db()
     for user in users:
         print(user.tolist())
@@ -198,23 +197,14 @@ def index():
     return render_template("index.html")
 
 
-# 在该界面一旦请求的url找不到， 触发404错误后，app会找到定义的改路由，返回定义的内容 render_template('page_not_found.html'), 404
-@app.errorhandler(404)
-def page_not_found(error):
-    # return render_template('page_not_found.html'), 404
-    resp = make_response(render_template('page_not_found.html'), 404)
-    # resp.headers['X-Something'] = 'hahahhaha'
-    # resp.set_cookie("aaa","xxxxx")
-    return resp
-
-
 # @app.route('/')
 # def index():
 #     print("首页")
 #    return render_template("index.html")
 
+
 @app.route('/login/', methods=['GET', 'POST'])
-def user_login():
+def user_login():  # 登录
     if request.method == "POST":
         username = request.form["user_name"]
         userpwd = request.form["user_pwd"]
@@ -242,14 +232,14 @@ def user_login():
 
 @app.route('/logout')
 @user_login_req
-def logout():
+def logout():  # 退出登录
     # remove the username from the session if it's there
     session.pop('user_name', None)
     return redirect(url_for('index'))
 
 
 @app.route('/regist/', methods=['GET', 'POST'])
-def user_regist():
+def user_regist():  # 注册
     if request.method == "POST":
         # print(request.form)
         user = User()
@@ -280,8 +270,44 @@ def user_regist():
 
 @app.route('/center/', methods=['GET', 'POST'])
 @user_login_req
-def user_center():
+def user_center():  # 个人中心
     return render_template("user_center.html")
+
+
+@app.route('/detail/', methods=['GET', 'POST'])
+@user_login_req
+def user_detail():  # 个人信息
+    user = query_user_by_name(session.get("user_name"))
+    return render_template("user_detail.html", user=user)
+
+
+@app.route('/pwd/', methods=['GET', 'POST'])
+@user_login_req
+def user_pwd():  # 修改个人密码
+
+    return render_template("user_pwd.html")
+
+
+@app.route('/info/', methods=['GET', 'POST'])
+@user_login_req
+def user_info():  # 修改个人信息
+    return render_template("user_info.html")
+
+
+@app.route('/del/', methods=['GET', 'POST'])
+@user_login_req
+def user_del():  # 注销个人账号
+    return render_template("user_del.html")
+
+
+# 在该界面一旦请求的url找不到， 触发404错误后，app会找到定义的改路由，返回定义的内容 render_template('page_not_found.html'), 404
+@app.errorhandler(404)
+def page_not_found(error):
+    # return render_template('page_not_found.html'), 404
+    resp = make_response(render_template('page_not_found.html'), 404)
+    # resp.headers['X-Something'] = 'hahahhaha'
+    # resp.set_cookie("aaa","xxxxx")
+    return resp
 
 
 if __name__ == '__main__':
