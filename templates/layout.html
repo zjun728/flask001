@@ -29,17 +29,17 @@
             </div>
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li class="active"><a href="{{ url_for("index") }}">首页</a></li>
+                    <li id="nav-1"><a href="{{ url_for("index") }}">首页</a></li>
                     <li><a href="#">相册</a></li>
                     <li><a href="#">关于</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     {% if "user_name" in session %}
-                        <li><a href="{{ url_for("user_center") }}">个人中心</a></li>
-                        <li><a href="{{ url_for("logout") }}">退出</a></li>
+                        <li id="nav-2"><a href="{{ url_for("user_center") }}">个人中心</a></li>
+                        <li id="nav-3"><a href="{{ url_for("logout") }}">退出</a></li>
                     {% else %}
-                        <li class="active"><a href="{{ url_for("user_login") }}">登录 </a></li>
-                        <li><a href="{{ url_for("user_regist") }}">注册</a></li>
+                        <li id="nav-4"><a href="{{ url_for("user_login") }}">登录 </a></li>
+                        <li id="nav-5"><a href="{{ url_for("user_regist") }}">注册</a></li>
                     {% endif %}
                     <!--
                     <li class="active"><a href="{{ url_for("user_login") }}">登录 <span class="sr-only">(current)</span></a></li>
@@ -55,7 +55,6 @@
         <h1>
             模板继承，user_login.html、 user_regist.html、 index.html 等界面继承此模板，并且重写此处内容
 
-
         </h1>
     {% endblock %}
 
@@ -66,5 +65,10 @@
 <script src="{{ url_for('static',filename='/bootstrap/jquery/jquery.min.js') }}"></script>
 <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
 <script src="{{ url_for('static',filename='bootstrap/bootstrap.min.js') }}"></script>
+
+{% block js_code %}
+{% endblock %}
+
+
 </body>
 </html>

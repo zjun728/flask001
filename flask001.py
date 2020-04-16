@@ -4,6 +4,8 @@ from model import User
 from flask import session
 import sqlite3
 
+from functools import wraps
+
 app = Flask(__name__)
 app.config["DATABASE"] = "database.db"
 app.config["SECRET_KEY"] = "who i am? do you know?"
@@ -132,23 +134,59 @@ def update_user_by_name(old_name, user):
     g.db.commit()
 
 
+# 登录装饰器检查登录状态（当未登陆账号时访问个人中心等界面直接跳转到登陆界面）
+def user_login_req(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user_name" not in session:
+            return redirect(url_for("user_login", next=request.url))  # next表示 当访问某一网页时，如果判断未登陆，则定位到登陆界面
+        return f(*args, **kwargs)  # 执行 f 函数本身
+
+    return decorated_function
+
+
+# 数据库操作：
+# 删除一条数据
+# delete_user_by_name("123")
+# print("==========================")
+# instert_user_to_db(user) #user_regist()
+# print("==========================")
+# 更新一条数据  修改张大宝信息 张大宝
+# user_one = query_user_by_name("张小宝")
+# if user_one:
+#     user_one.name = "张大宝"
+#     user_one.pwd = "321"
+#     user_one.age = "18"
+#     user_one.email = "321@qq"
+#     user_one.birthday = "2020-04-13"
+#     update_user_by_name("张小宝", user_one)
+# print("==========================")
+# 查询所有数据
+# users = query_users_from_db()
+# for user in users:
+#     print(user.tolist())
+# print("==========================")
+
+# 查询一条数据
+# user_one = query_user_by_name("123")
+# if user_one:
+#     print(user_one.tolist())
+# print("==========================")
+#
+
+
 @app.route('/')
 def index():
-    print("首页")
-    # 查询所有数据
     users = query_users_from_db()
     for user in users:
         print(user.tolist())
     print("==========================")
+
     # print(session)
-
-    resp = make_response(render_template("index.html"))
+    # resp = make_response(render_template("index.html"))
     #  resp.set_cookie('qqqq', 'xxxxxxx')
-
-    # 删除一条数据
-    # delete_user_by_name("123")
-
-    return resp
+    # return resp
+    return render_template("index.html")
 
 
 # 在该界面一旦请求的url找不到， 触发404错误后，app会找到定义的改路由，返回定义的内容 render_template('page_not_found.html'), 404
@@ -168,16 +206,6 @@ def page_not_found(error):
 
 @app.route('/login/', methods=['GET', 'POST'])
 def user_login():
-    # 更新一条数据  修改张大宝信息 张大宝
-    # user_one = query_user_by_name("张小宝")
-    # if user_one:
-    #     user_one.name = "张大宝"
-    #     user_one.pwd = "321"
-    #     user_one.age = "18"
-    #     user_one.email = "321@qq"
-    #     user_one.birthday = "2020-04-13"
-    #     update_user_by_name("张小宝", user_one)
-
     if request.method == "POST":
         username = request.form["user_name"]
         userpwd = request.form["user_pwd"]
@@ -202,21 +230,9 @@ def user_login():
 
     return render_template("user_login.html")
 
-    # 查询所有数据
-    # users = query_users_from_db()
-    # for user in users:
-    #     print(user.tolist())
-    # print("==========================")
-
-    # 查询一条数据
-    # user_one = query_user_by_name("123")
-    # if user_one:
-    #     print(user_one.tolist())
-
-    return render_template("user_login.html")
-
 
 @app.route('/logout')
+@user_login_req
 def logout():
     # remove the username from the session if it's there
     session.pop('user_name', None)
@@ -254,6 +270,7 @@ def user_regist():
 
 
 @app.route('/center/', methods=['GET', 'POST'])
+@user_login_req
 def user_center():
     return render_template("user_center.html")
 
