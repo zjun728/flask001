@@ -1,5 +1,6 @@
 from flask import Flask, url_for, render_template, request, redirect, g, flash, get_flashed_messages, make_response
 
+from forms import RegistForm
 from model import User
 from flask import session
 import sqlite3
@@ -241,6 +242,7 @@ def logout():  # 退出登录
 
 @app.route('/regist/', methods=['GET', 'POST'])
 def user_regist():  # 注册
+    form = RegistForm()
     if request.method == "POST":
         # print(request.form)
         user = User()
@@ -257,7 +259,7 @@ def user_regist():  # 注册
             # 返回注册界面，重新注册
             flash("用户名已存在！", category="err")  # Flashes a message to the next request 闪现一条消息到下一次消息请求
 
-            return render_template("user_regist.html")
+            return render_template("user_regist2.html")
 
         # 如果不存在执行插入操作
         # 插入一条数据
@@ -266,7 +268,7 @@ def user_regist():  # 注册
         # username作为查询参数带到url中去
         ## 重定向页面 生成url 执行 user_login 函数 跳转到登录界面
         return redirect(url_for("user_login", username=user.name))
-    return render_template("user_regist.html")
+    return render_template("user_regist2.html", form=form)
 
 
 @app.route('/center/', methods=['GET', 'POST'])
