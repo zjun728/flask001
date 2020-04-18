@@ -11,38 +11,58 @@
         <h3 style="color: green"> {{ message }}</h3>
     {% endfor %}
 
-    <form role="form" method="post" class="col-lg-6 col-md-offset-3">
+    <form role="form" method="post" class="col-md-6 col-md-offset-3">
         <div class="form-group">
-            <label for="user_name">{{ form.user_name.label }}</label>
+            {{ form.user_name.label }}<br/>
             {{ form.user_name }}
+            {% for err in form.user_name.errors %}
+                <p style="color: red">{{ err }} </p>
+            {% endfor %}
+
         </div>
 
         <div class="form-group">
-            <label for="user_pwd">{{ form.user_pwd.label }}</label>
+            {{ form.user_pwd.label }}<br/>
             {{ form.user_pwd }}
+            {% for err in form.user_pwd.errors %}
+                <p style="color: red">{{ err }} </p>
+            {% endfor %}
         </div>
 
         <div class="form-group">
-            <label for="user_email">{{ form.user_email.label }}</label>
+            {{ form.user_email.label }}<br/>
             {{ form.user_email }}
+            {% for err in form.user_email.errors %}
+                <p style="color: red">{{ err }} </p>
+            {% endfor %}
         </div>
 
         <div class="form-group">
-            <label for="user_age">{{ form.user_age.label }}</label>
+            {{ form.user_age.label }}<br/>
             {{ form.user_age }}
+            {% for err in form.user_age.errors %}
+                <p style="color: red">{{ err }} </p>
+            {% endfor %}
         </div>
 
         <div class="form-group">
-            <label for="user_birthday">{{ form.user_birthday.label }}</label>
+            {{ form.user_birthday.label }}<br/>
             {{ form.user_birthday }}
+            {% for err in form.user_birthday.errors %}
+                <p style="color: red">{{ err }} </p>
+            {% endfor %}
         </div>
 
         <div class="form-group">
-            <label for="user_face">{{ form.user_face.label }}</label>
+            {{ form.user_face.label }}<br/>
             {{ form.user_face }}
+            {% for err in form.user_face.errors %}
+                <p style="color: red">{{ err }} </p>
+            {% endfor %}
         </div>
 
         <div class="form-group">
+            {{ form.csrf_token }}    <!--csrf表单保护-->
             {{ form.submit }}
         </div>
     </form>

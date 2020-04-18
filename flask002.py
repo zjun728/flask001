@@ -1,6 +1,6 @@
 from flask import Flask, url_for, render_template, request, redirect, g, flash, get_flashed_messages, make_response
 
-from forms import RegistForm
+from forms import RegistForm, LoginForm
 from model import User
 from flask import session
 import sqlite3
@@ -207,29 +207,33 @@ def index():  # 首页
 
 @app.route('/login/', methods=['GET', 'POST'])
 def user_login():  # 登录
-    if request.method == "POST":
-        username = request.form["user_name"]
-        userpwd = request.form["user_pwd"]
+
+    form = LoginForm()
+    if form.validate_on_submit():
+        # username = request.form["user_name"]
+        username = form.user_name.data
+        # userpwd = request.form["user_pwd"]
+        userpwd = form.user_pwd.data
         # 查看用户是否存在
         user_one = query_user_by_name(username)
         if not user_one:
             # 返回注册界面，重新登录
             flash("用户名不存在！", category="err")  # Flashes a message to the next request 闪现一条消息到下一次消息请求
-            return render_template("user_login.html")
+            return render_template("user_login2.html", form=form)
         else:
             # print(type(userpwd))
             # print(type(user_one.pwd))
             if str(userpwd) != str(user_one.pwd):
                 # 返回注册界面，重新登录
                 flash("密码输入错误！", category="err")  # Flashes a message to the next request 闪现一条消息到下一次消息请求
-                return render_template("user_login.html")
+                return render_template("user_login2.html", form=form)
             else:
                 # flash("登录成功！", category="ok")  # Flashes a message to the next request 闪现一条消息到下一次消息请求
                 session["user_name"] = user_one.name
                 # return render_template("index.html") #只返回index.html界面
                 return redirect(url_for('index'))  # 重定向界面并执行index路由视图函数
 
-    return render_template("user_login.html")
+    return render_template("user_login2.html", form=form)
 
 
 @app.route('/logout')
@@ -243,15 +247,24 @@ def logout():  # 退出登录
 @app.route('/regist/', methods=['GET', 'POST'])
 def user_regist():  # 注册
     form = RegistForm()
-    if request.method == "POST":
-        # print(request.form)
+    if form.validate_on_submit():  # 检查提交方式是否为post 验证forms.py定义的validators 验证是否通过
+        # print("form", form.user_name.data)
+        # print("form", form.data)
+        # print("form", form.data["user_name"])
+        # print("request.form", request.form)
         user = User()
-        user.name = request.form["user_name"]
-        user.pwd = request.form["user_pwd"]
-        user.age = request.form["user_age"]
-        user.birthday = request.form["user_birthday"]
-        user.email = request.form["user_email"]
-        user.face = request.form["user_face"]
+        # user.name = request.form["user_name"]
+        user.name = form.user_name.data
+        # user.pwd = request.form["user_pwd"]
+        user.pwd = form.user_pwd.data
+        # user.age = request.form["user_age"]
+        user.age = form.user_age.data
+        # user.birthday = request.form["user_birthday"]
+        user.birthday = form.user_birthday.data
+        # user.email = request.form["user_email"]
+        user.email = form.user_email.data
+        # user.face = request.form["user_face"]
+        user.face = form.user_face.data
 
         # 查看用户是否存在
         user_one = query_user_by_name(user.name)
@@ -259,7 +272,7 @@ def user_regist():  # 注册
             # 返回注册界面，重新注册
             flash("用户名已存在！", category="err")  # Flashes a message to the next request 闪现一条消息到下一次消息请求
 
-            return render_template("user_regist2.html")
+            return render_template("user_regist2.html", form=form)
 
         # 如果不存在执行插入操作
         # 插入一条数据
